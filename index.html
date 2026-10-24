@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#08090d">
+<title>5 ночей с ютуберами</title>
+<style>
+:root{--bg:#08090d;--panel:#12151d;--line:#343b48;--text:#e9edf5;--muted:#9ca6b7;--red:#d83a43;--green:#7dffad}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;overflow:hidden}
+button{font:inherit;color:inherit;border:1px solid #454d5c;background:#171b25;border-radius:12px;padding:12px 16px;cursor:pointer;touch-action:manipulation}
+button:active{transform:scale(.98);background:#242b39}button:disabled{opacity:.4}
+#app{height:100dvh;display:flex;flex-direction:column;max-width:1100px;margin:auto;padding:10px;gap:8px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:800;letter-spacing:.04em;font-size:13px}
+.pill{border:1px solid var(--line);background:#11141b;border-radius:999px;padding:7px 10px;color:#cbd3df}
+#scene{position:relative;flex:1;min-height:180px;border:1px solid #323946;border-radius:16px;overflow:hidden;background:#0c0d12;isolation:isolate}
+#scene canvas{width:100%;height:100%;display:block}
+.vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 38%,rgba(0,0,0,.55) 100%)}
+#nightIntro{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;background:rgba(0,0,0,.78);z-index:3}
+#nightIntro.hidden{display:none}.introCard{max-width:480px}.eyebrow{font-size:11px;letter-spacing:.2em;color:#ff7279;font-weight:900}.introCard h2{font-size:clamp(24px,5vw,42px);margin:8px 0}.introCard p{color:#c1c7d2;line-height:1.5}
+#status{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:#bdc5d3;flex-wrap:wrap}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.turn{min-height:58px;font-weight:900;font-size:15px;display:flex;justify-content:center;align-items:center;gap:8px}
+.turn span{font-size:22px}.primary{background:#74252b;border-color:#a83b43;font-weight:900}.secondary{background:#10131a}
+.bottom{display:grid;grid-template-columns:1fr auto;gap:8px}
+#message{background:#11141b;border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-height:48px;font-size:13px;line-height:1.35;color:#d7deea;display:flex;align-items:center}
+#actionBtn{min-width:112px;font-weight:800}
+.hidden{display:none!important}
+#menu{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;padding:18px;background:radial-gradient(ellipse at 50% 30%,#242632 0%,#0a0b10 58%,#050609 100%)}
+.menuBox{width:min(560px,100%);text-align:center;border:1px solid #343a48;background:rgba(11,13,19,.92);border-radius:22px;padding:clamp(20px,5vw,42px);box-shadow:0 25px 100px #000}
+.logo{font-size:clamp(28px,7vw,52px);line-height:1;font-weight:1000;letter-spacing:-.05em;text-transform:uppercase}.logo em{font-style:normal;color:#f0525b}.subtitle{color:#aab3c2;margin:14px 0 22px;line-height:1.5}
+.menuActions{display:grid;gap:10px}.menuActions button{padding:15px;font-weight:900}.tiny{font-size:11px;color:#7f899a;margin-top:18px;line-height:1.5}
+#callModal,#endModal{position:fixed;inset:0;background:rgba(0,0,0,.83);z-index:20;display:flex;align-items:center;justify-content:center;padding:18px}
+.modalBox{width:min(500px,100%);border:1px solid #444b5a;background:#10131a;border-radius:20px;padding:22px;box-shadow:0 20px 90px #000}
+.phoneIcon{width:52px;height:52px;border:1px solid #5b3339;background:#29171c;border-radius:50%;display:grid;place-items:center;font-size:24px;margin-bottom:14px}
+.modalBox h2{margin:0 0 10px}.quote{font-size:16px;line-height:1.6;color:#e4e8f0;margin:12px 0 20px}.modalBox button{width:100%;font-weight:900}
+#toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:30;background:#191e29;border:1px solid #414a5a;border-radius:999px;padding:10px 16px;font-size:12px;box-shadow:0 10px 35px #000;max-width:90%;text-align:center}
+@media(min-width:700px){#app{padding:16px;gap:10px}.controls{grid-template-columns:1fr 1fr}.turn{min-height:64px}.bottom{grid-template-columns:1fr 150px}}
+@media(max-height:600px){#app{padding:6px;gap:5px}.turn{min-height:44px;padding:8px}.topbar{font-size:11px}#message{min-height:38px;padding:7px 9px}.pill{padding:5px 8px}}
+</style>
+</head>
+<body>
+<div id="menu">
+  <div class="menuBox">
+    <div class="eyebrow">НЕ СПУСКАЙ ГЛАЗ С ТЕМНОТЫ</div>
+    <div class="logo">5 НОЧЕЙ<br>С <em>ЮТУБЕРАМИ</em></div>
+    <div class="subtitle">Ты — Подписчик Матвея. Ты заперт в подвале: переживи пять ночей, следи за коридорами и закрывай двери, когда ютуберы подходят слишком близко.</div>
+    <div class="menuActions">
+      <button class="primary" id="startBtn">НАЧАТЬ НОВУЮ ИГРУ</button>
+      <button id="continueBtn" class="secondary">КАК ИГРАТЬ</button>
+    </div>
+    <div class="tiny">Псевдо-3D • Управление для телефона • Лёгкая графика<br>Отдельный проект. «Ферма Ютуберов» и «Кража Ютуберов» продолжаются.</div>
+  </div>
+</div>
+<div id="app">
+  <div class="topbar"><span>5 НОЧЕЙ С ЮТУБЕРАМИ</span><span class="pill" id="nightLabel">НОЧЬ 1 / 5</span><span class="pill" id="clock">12:00 AM</span></div>
+  <div id="scene">
+    <canvas id="gameCanvas"></canvas><div class="vignette"></div>
+    <div id="nightIntro"><div class="introCard"><div class="eyebrow">ПОДВАЛ • СМЕНА НАЧИНАЕТСЯ</div><h2 id="introTitle">Ночь 1</h2><p id="introText">Слушай звонок и следи за коридорами.</p><button class="primary" id="introStart">НАЧАТЬ НОЧЬ</button></div></div>
+  </div>
+  <div id="status"><span id="directionLabel">Взгляд: прямо</span><span id="threatLabel">Движение не обнаружено</span><span id="powerLabel">Заряд: 100%</span></div>
+  <div class="controls">
+    <button class="turn" id="leftBtn"><span>◀</span> ПОВЕРНУТЬ ВЛЕВО</button>
+    <button class="turn" id="rightBtn">ПОВЕРНУТЬ ВПРАВО <span>▶</span></button>
+  </div>
+  <div class="controls">
+    <button class="turn secondary" id="leftDoorBtn">🚪 ЗАКРЫТЬ ЛЕВУЮ ДВЕРЬ</button>
+    <button class="turn secondary" id="rightDoorBtn">🚪 ЗАКРЫТЬ ПРАВУЮ ДВЕРЬ</button>
+  </div>
+  <div class="bottom"><div id="message">Ты — Подписчик Матвея. Нажми «Начать ночь», чтобы услышать Блазвокса.</div><button id="actionBtn" class="secondary">ПРОВЕРИТЬ</button></div>
+</div>
+<div id="callModal" class="hidden"><div class="modalBox"><div class="phoneIcon">☎</div><div class="eyebrow">ВХОДЯЩИЙ ЗВОНОК</div><h2>Блазвокс</h2><div id="callText" class="quote"></div><button id="callDone" class="primary">ПОНЯТНО</button></div></div>
+<div id="endModal" class="hidden"><div class="modalBox"><div class="eyebrow">КОНЦОВКА</div><h2 id="endTitle">Ты выбрался!</h2><p id="endText" class="quote"></p><button id="endBtn" class="primary">В МЕНЮ</button></div></div>
+<div id="toast" class="hidden"></div>
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+const canvas = $('gameCanvas'), ctx = canvas.getContext('2d');
+const calls = [
+'Привет, я Блазвокс, мне кажется или... Ты в каком-то подвале? Ладно, выживи тут 5 ночей и подвал откроется.',
+'Эй, ты там живой? Ну если ты это слышишь, то значит да. В эту ночь Нексблокса отвезли на ремонт, он не появится, но всё равно надо следить за остальными.',
+'Эм... Я не знаю что тебе говорить, ну поиграй в котости, я хз.',
+'Так, а я забыл, зачем я тебе позвонил, ладно, осталась последняя ночь.',
+'А ты кто??? Ты у меня подписан как жертва, ладно, я больше не буду тебе звонить.'
+];
+const state = {night:1, direction:0, running:false, nightStarted:false, elapsed:0, last:0, callShown:false, checked:false, danger:0, threatSide:1, ended:false, anim:0, power:100, doors:{left:false,right:false}, visitorTimer:0, visitorAtDoor:false, playerName:'ПОДПИСЧИК МАТВЕЯ'};
+const nightNames = ['Подвал','Ремонт','Котости','Забывчивость','Жертва'];
+function resize(){const r=canvas.getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,1.5);canvas.width=Math.max(1,Math.floor(r.width*d));canvas.height=Math.max(1,Math.floor(r.height*d));ctx.setTransform(d,0,0,d,0,0);draw();}
+window.addEventListener('resize',resize);
+function polygon(points,fill){ctx.fillStyle=fill;ctx.beginPath();ctx.moveTo(points[0][0],points[0][1]);for(let i=1;i<points.length;i++)ctx.lineTo(points[i][0],points[i][1]);ctx.closePath();ctx.fill();}
+function drawCharacter(x,y,s,name,kind){
+ ctx.save();ctx.translate(x,y);ctx.scale(s,s);
+ // shadow
+ ctx.fillStyle='rgba(0,0,0,.65)';ctx.beginPath();ctx.ellipse(0,3,33,8,0,0,Math.PI*2);ctx.fill();
+ const body=kind===0?'#353c4b':kind===1?'#20242d':'#45413e';
+ ctx.fillStyle=body;ctx.beginPath();ctx.moveTo(-24,-18);ctx.lineTo(-31,0);ctx.lineTo(-24,26);ctx.lineTo(23,26);ctx.lineTo(30,0);ctx.lineTo(22,-18);ctx.closePath();ctx.fill();
+ ctx.fillStyle=kind===1?'#aeb6c2':'#c3c9d2';ctx.beginPath();ctx.ellipse(0,-34,25,28,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#12141a';ctx.beginPath();ctx.ellipse(0,-38,20,21,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle=kind===0?'#ff4856':kind===1?'#f5e7d4':'#f2a64c';
+ const eyeY=-39;ctx.beginPath();ctx.ellipse(-8,eyeY,4,6,0,0,Math.PI*2);ctx.ellipse(8,eyeY,4,6,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#050608';ctx.fillRect(-9,-24,18,3);
+ ctx.strokeStyle='#07080b';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-12,-53);ctx.lineTo(-21,-63);ctx.moveTo(12,-53);ctx.lineTo(21,-63);ctx.stroke();
+ ctx.fillStyle='#dce2ec';ctx.font='bold 10px system-ui';ctx.textAlign='center';ctx.fillText(name,0,43);
+ ctx.restore();
+}
+function draw(){
+ const w=canvas.clientWidth||320,h=canvas.clientHeight||240;if(!w||!h)return;
+ ctx.clearRect(0,0,w,h);
+ const g=ctx.createLinearGradient(0,0,0,h);g.addColorStop(0,'#171a22');g.addColorStop(.55,'#101218');g.addColorStop(1,'#050609');ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
+ // back wall and perspective corridor
+ const shift=state.direction* w*.1;
+ polygon([[w*.17,h*.18],[w*.83,h*.18],[w*.98,h],[w*.02,h]],'#242733');
+ polygon([[w*.29,h*.28],[w*.71,h*.28],[w*.79,h],[w*.21,h]],'#0b0d12');
+ polygon([[w*.17,h*.18],[w*.29,h*.28],[w*.21,h],[w*.02,h]],'#303542');
+ polygon([[w*.83,h*.18],[w*.71,h*.28],[w*.79,h],[w*.98,h]],'#20242e');
+ // floor perspective lines
+ for(let i=0;i<7;i++){let y=h*.38+i*i*h*.014;ctx.strokeStyle='rgba(135,146,166,.12)';ctx.beginPath();ctx.moveTo(w*.5,y);ctx.lineTo(w*.05+i*w*.025,h);ctx.moveTo(w*.5,y);ctx.lineTo(w*.95-i*w*.025,h);ctx.stroke();}
+ // ceiling light
+ ctx.fillStyle='rgba(219,225,240,.13)';ctx.fillRect(w*.43,h*.1,w*.14,5);
+ ctx.fillStyle='rgba(220,226,245,.07)';ctx.beginPath();ctx.moveTo(w*.43,h*.1);ctx.lineTo(w*.15,h*.65);ctx.lineTo(w*.85,h*.65);ctx.lineTo(w*.57,h*.1);ctx.fill();
+ // pipes
+ for(let i=0;i<3;i++){let x=(i+1)*w/4+shift*.15;ctx.strokeStyle='#454b58';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h*.17);ctx.lineTo(x+(i-1)*12,h*.24);ctx.stroke();}
+ // side door panels / animated closed doors
+ const leftX=w*.05, rightX=w*.76, doorY=h*.32, doorW=w*.16, doorH=h*.42;
+ ctx.fillStyle='#080a0e';ctx.fillRect(leftX,doorY,doorW,doorH);ctx.fillRect(rightX,doorY,doorW,doorH);
+ ctx.strokeStyle='#444b58';ctx.lineWidth=3;ctx.strokeRect(leftX,doorY,doorW,doorH);ctx.strokeRect(rightX,doorY,doorW,doorH);
+ if(state.doors.left){ctx.fillStyle='#555b67';ctx.fillRect(leftX,doorY,doorW,doorH);ctx.strokeStyle='#9299a6';ctx.lineWidth=2;for(let yy=doorY+8;yy<doorY+doorH;yy+=13){ctx.beginPath();ctx.moveTo(leftX+3,yy);ctx.lineTo(leftX+doorW-3,yy);ctx.stroke();}ctx.fillStyle='#e6bd68';ctx.fillRect(leftX+doorW*.78,doorY+doorH*.52,4,10);}
+ if(state.doors.right){ctx.fillStyle='#555b67';ctx.fillRect(rightX,doorY,doorW,doorH);ctx.strokeStyle='#9299a6';ctx.lineWidth=2;for(let yy=doorY+8;yy<doorY+doorH;yy+=13){ctx.beginPath();ctx.moveTo(rightX+3,yy);ctx.lineTo(rightX+doorW-3,yy);ctx.stroke();}ctx.fillStyle='#e6bd68';ctx.fillRect(rightX+doorW*.78,doorY+doorH*.52,4,10);}
+ if(state.visitorAtDoor && state.threatSide===-1 && !state.doors.left){drawCharacter(w*.16,h*.68,1.12,state.night===2?'KENJAKU':'NEKSBLOCKS',2);}
+ if(state.visitorAtDoor && state.threatSide===1 && !state.doors.right){drawCharacter(w*.84,h*.68,1.12,state.night===2?'MATVEY GAME':'MATVEY GAME',0);}
+ // desk and first-person hands: the player is the Subscriber of Matvey, not a YouTuber.
+ polygon([[w*.2,h*.79],[w*.8,h*.79],[w*.92,h],[w*.08,h]],'#171b24');
+ ctx.fillStyle='#07090d';ctx.fillRect(w*.39,h*.73,w*.22,h*.08);
+ ctx.strokeStyle='#4d5666';ctx.strokeRect(w*.39,h*.73,w*.22,h*.08);
+ ctx.fillStyle='#a7b6cb';ctx.font='10px monospace';ctx.textAlign='center';ctx.fillText('ПОДПИСЧИК МАТВЕЯ',w*.5,h*.78);
+ // first-person forearms/hands at the bottom edge, like the player is standing/sitting in the room
+ polygon([[w*.29,h],[w*.37,h*.86],[w*.45,h*.88],[w*.43,h]],'#8c6655');
+ polygon([[w*.71,h],[w*.63,h*.86],[w*.55,h*.88],[w*.57,h]],'#8c6655');
+ // static flicker
+ if(state.running && Math.sin(state.anim*3.1)>0.97){ctx.fillStyle='rgba(220,230,255,.06)';ctx.fillRect(0,0,w,h);}
+ // YouTubers appear as threats in the corridors; they are not the player viewpoint.
+ if(state.running && state.nightStarted && state.visitorAtDoor){
+  const side=state.threatSide;
+  const enemy=state.night===2?'MATVEY GAME':(state.night%2===0?'KENJAKU':'NEKSBLOCKS');
+  const kind=enemy==='MATVEY GAME'?0:(enemy==='KENJAKU'?1:2);
+  const x=side===-1?w*.16:w*.84;
+  const doorClosed=side===-1?state.doors.left:state.doors.right;
+  if(!doorClosed)drawCharacter(x,h*.68,1.12,enemy,kind);
+ }
+ if(state.running && state.nightStarted && state.danger>1 && state.direction===state.threatSide){ctx.fillStyle='rgba(125,0,10,.18)';ctx.fillRect(0,0,w,h);}
+ // tiny overlay grain
+ ctx.fillStyle='rgba(0,0,0,.12)';for(let i=0;i<18;i++){let x=(i*97+state.anim*13)%w;ctx.fillRect(x,(i*53)%h,1,2);}
+}
+function toast(t){$('toast').textContent=t;$('toast').classList.remove('hidden');setTimeout(()=>$('toast').classList.add('hidden'),1800);}
+function updateLabels(){
+ $('leftDoorBtn').textContent=(state.doors.left?'🔒 ОТКРЫТЬ ЛЕВУЮ ДВЕРЬ':'🚪 ЗАКРЫТЬ ЛЕВУЮ ДВЕРЬ');
+ $('rightDoorBtn').textContent=(state.doors.right?'🔒 ОТКРЫТЬ ПРАВУЮ ДВЕРЬ':'🚪 ЗАКРЫТЬ ПРАВУЮ ДВЕРЬ');
+ $('powerLabel').textContent='Заряд: '+Math.max(0,Math.round(state.power))+'%';
+ $('nightLabel').textContent=`НОЧЬ ${state.night} / 5`;
+ $('clock').textContent=state.elapsed<15?'12:00 AM':state.elapsed<30?'1:00 AM':state.elapsed<45?'2:00 AM':state.elapsed<60?'3:00 AM':state.elapsed<75?'4:00 AM':'5:00 AM';
+ $('directionLabel').textContent='Взгляд: '+(['влево','прямо','вправо'][state.direction+1]);
+ $('threatLabel').textContent=state.danger>=2?'Шорох рядом...':state.danger===1?'Что-то движется в темноте':'Движение не обнаружено';
+}
+function beginGame(){state.night=1;state.direction=0;state.running=true;state.nightStarted=false;state.elapsed=0;state.danger=0;state.power=100;state.doors.left=false;state.doors.right=false;state.visitorAtDoor=false;state.visitorTimer=0;state.ended=false;$('menu').classList.add('hidden');showIntro();}
+function showIntro(){
+ state.nightStarted=false;state.doors.left=false;state.doors.right=false;state.visitorAtDoor=false;state.visitorTimer=0;$('nightIntro').classList.remove('hidden');
+ $('introTitle').textContent=`Ночь ${state.night} — ${nightNames[state.night-1]}`;
+ $('introText').textContent=state.night===2?'Ты — Подписчик Матвея. Сегодня NEKSBLOCKS не появится: следи за Matvey Game и Kenjaku.':'Ты — Подписчик Матвея, запертый в подвале. Следи за коридорами, закрывай двери вовремя и береги заряд.';
+ $('message').textContent=`Ночь ${state.night}. Сначала послушай Блазвокса.`;
+ draw();
+}
+function startNight(){
+ $('nightIntro').classList.add('hidden');state.nightStarted=true;state.elapsed=0;state.danger=0;state.checked=false;
+ $('callText').textContent=calls[state.night-1];$('callModal').classList.remove('hidden');state.callShown=true;
+ $('message').textContent='Блазвокс звонит...';
+}
+function finishCall(){$('callModal').classList.add('hidden');$('message').textContent='Звонок завершён. Ты — Подписчик Матвея. Следи за дверями: закрытые двери расходуют заряд.';state.callShown=false;}
+function turn(dir){if(!state.running||!state.nightStarted||state.callShown||state.ended)return;state.direction=dir;state.checked=false;
+ const side=dir===-1?'left':'right';
+ if(state.visitorAtDoor && state.threatSide===dir && !state.doors[side]){$('message').textContent='ОН УЖЕ У ДВЕРИ! Быстро закрой дверь!';}
+ else {$('message').textContent=dir===-1?'Ты смотришь в левый коридор. Прислушайся к шагам.':'Ты смотришь в правый коридор. В темноте что-то шевелится.';}
+ draw();updateLabels();
+}
+function toggleDoor(side){
+ if(!state.running||!state.nightStarted||state.callShown||state.ended)return;
+ if(state.power<=0){toast('Заряд закончился! Двери не работают.');return;}
+ state.doors[side]=!state.doors[side];
+ const closed=state.doors[side];
+ $(side==='left'?'leftDoorBtn':'rightDoorBtn').textContent=closed?'🔒 ОТКРЫТЬ ЛЕВУЮ ДВЕРЬ'.replace('ЛЕВУЮ',side==='left'?'ЛЕВУЮ':'ПРАВУЮ'):'🚪 ЗАКРЫТЬ '+(side==='left'?'ЛЕВУЮ':'ПРАВУЮ')+' ДВЕРЬ';
+ if(closed){
+   if(state.visitorAtDoor && state.threatSide===(side==='left'?-1:1)){state.visitorTimer=0;$('message').textContent='Дверь захлопнулась! Подожди — он должен уйти.';}
+   else {$('message').textContent='Дверь закрыта. Внимание: заряд постепенно расходуется.';}
+ }else{
+   $('message').textContent='Дверь открыта. Экономь заряд, но следи за коридором!';
+   if(state.visitorAtDoor && state.threatSide===(side==='left'?-1:1)){state.danger=Math.min(3,state.danger+.8);}
+ }
+ draw();updateLabels();
+}
+function checkArea(){
+ if(!state.running||!state.nightStarted||state.callShown)return;
+ state.checked=true;
+ if(state.visitorAtDoor && state.direction===state.threatSide){
+   const side=state.threatSide===-1?'left':'right';
+   if(state.doors[side]){$('message').textContent='За дверью слышны шаги. Не открывай её слишком рано!';}
+   else {$('message').textContent='Персонаж стоит у двери! Закрой '+(side==='left'?'левую':'правую')+' дверь!';}
+ } else if(state.direction===state.threatSide && state.danger>=.7){
+   state.visitorAtDoor=true;state.visitorTimer=0;
+   $('message').textContent='Ты заметил персонажа в коридоре! Он приближается — закрой дверь, когда он окажется у входа.';
+   toast('Кто-то приближается!');
+ } else {
+   state.danger=Math.min(3,state.danger+.35);
+   $('message').textContent=state.direction===0?'В центре тихо. Слева и справа слышны шаги...':'Коридор кажется пустым, но шум становится громче.';
+ }
+ draw();updateLabels();
+}
+function lose(){if(state.ended)return;state.running=false;state.ended=true;$('endTitle').textContent=state.power<=0?'Заряд закончился!':'Тебя нашли...';$('endText').textContent=state.power<=0?`Ночь ${state.night} не пережита: батарея полностью разрядилась. Не держи двери закрытыми слишком долго.`:`Ночь ${state.night} не пережита. В темноте персонаж приблизился слишком близко. Попробуй снова — проверяй коридоры и закрывай нужную дверь вовремя.`;$('endModal').classList.remove('hidden');}
+function winNight(){
+ state.nightStarted=false;
+ if(state.night>=5){state.running=false;state.ended=true;$('endTitle').textContent='Ты выбрался из подвала!';$('endText').textContent='Дверь со скрипом открылась. Ты пережил все пять ночей, а звонки Блазвокса наконец прекратились. Конец — или только начало?';$('endModal').classList.remove('hidden');return;}
+ state.night++;state.direction=0;showIntro();toast('Ночь пережита!');
+}
+function loop(t){
+ if(!state.last)state.last=t;const dt=Math.min((t-state.last)/1000,.1);state.last=t;state.anim+=dt;
+ if(state.running&&state.nightStarted&&!state.callShown&&!state.ended){
+  state.elapsed+=dt;
+  // Doors use power continuously while closed; opening them saves energy.
+  const closedCount=(state.doors.left?1:0)+(state.doors.right?1:0);
+  state.power=Math.max(0,state.power-dt*(closedCount?(35/15)*closedCount:0.025));
+  if(state.power<=0){state.doors.left=false;state.doors.right=false;$('message').textContent='Заряд закончился! Ты проиграл.';lose();}
+  // The visitor advances, appears in a corridor, then waits at the door.
+  if(Math.floor(state.elapsed/7)!==Math.floor((state.elapsed-dt)/7)){
+    state.danger=Math.min(3,state.danger+.34);
+    if(!state.visitorAtDoor && Math.random()<.72){
+      state.threatSide=Math.random()<.5?-1:1;
+      if(state.night===2 && state.threatSide===-1)state.threatSide=1;
+      $('message').textContent='Слышны тяжёлые шаги в '+(state.threatSide===-1?'левом':'правом')+' коридоре...';
+    }
+  }
+  if(state.danger>=1.15 && !state.visitorAtDoor && Math.random()<.035){state.visitorAtDoor=true;state.visitorTimer=0;$('message').textContent='Персонаж появился у входа! Закрой дверь с этой стороны!';}
+  if(state.visitorAtDoor){
+    const side=state.threatSide===-1?'left':'right';
+    if(state.doors[side]){
+      state.visitorTimer+=dt;
+      if(state.visitorTimer>=4.5){
+        state.visitorAtDoor=false;state.visitorTimer=0;state.danger=Math.max(0,state.danger-.9);
+        state.threatSide=state.threatSide===-1?1:-1;
+        $('message').textContent='Шаги затихли. Персонаж ушёл. Можно открыть дверь, чтобы сберечь заряд.';
+        toast('Персонаж ушёл');
+      }
+    } else {
+      state.visitorTimer=0;
+      state.danger=Math.min(3,state.danger+dt*.22);
+      if(state.danger>=2.85)lose();
+    }
+  }
+  if(state.running && state.power<=0)lose();
+  if(state.running && state.elapsed>=85)winNight();
+  updateLabels();if(Math.random()<.12)draw();
+ }
+ requestAnimationFrame(loop);
+}
+$('startBtn').addEventListener('click',beginGame);
+$('continueBtn').addEventListener('click',()=>toast('Поворачивайся влево и вправо. Нажимай «Проверить», если слышишь шаги. Переживи пять ночей!'));
+$('introStart').addEventListener('click',startNight);
+$('callDone').addEventListener('click',finishCall);
+$('leftBtn').addEventListener('click',()=>turn(-1));
+$('rightBtn').addEventListener('click',()=>turn(1));
+$('leftDoorBtn').addEventListener('click',()=>toggleDoor('left'));
+$('rightDoorBtn').addEventListener('click',()=>toggleDoor('right'));
+$('actionBtn').addEventListener('click',checkArea);
+$('endBtn').addEventListener('click',()=>{$('endModal').classList.add('hidden');$('menu').classList.remove('hidden');});
+window.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key.toLowerCase()==='a')turn(-1);if(e.key==='ArrowRight'||e.key.toLowerCase()==='d')turn(1);if(e.key===' '||e.key==='Enter')checkArea();});
+resize();updateLabels();requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
